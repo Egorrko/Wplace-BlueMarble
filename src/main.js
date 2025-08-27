@@ -261,15 +261,15 @@ function buildOverlayMain() {
   let savedCoords = {};
   try { savedCoords = JSON.parse(GM_getValue('bmCoords', '{}')) || {}; } catch (_) { savedCoords = {}; }
   const updateSelector = async (selector) => {
-    const input = await fetch(`${base_url}/wplace/data`);
+    const input = await fetch(`${base_url}/wplace-api/data`);
     const input_json = await input.json();
-    console.log("input_json", input_json);
 
     GM.setValue('bmOptions', JSON.stringify(input_json));
 
     overlayMain.handleSelectorStatus(input_json.images);
 
     loadSelectedTemplate(selector);
+    overlayMain.handleDisplayStatus(`Скачиваем шаблон! Ожидайте...`);
   }
 
   const loadSelectedTemplate = async (selector) => {
@@ -280,21 +280,8 @@ function buildOverlayMain() {
     const name = selected_template.name;
 
     templateManager.createTemplate(input_blob, name, [selected_template.coords.tx, selected_template.coords.ty, selected_template.coords.px, selected_template.coords.py]);
-    overlayMain.handleDisplayStatus(`Loaded template "${name}"!`);
+    overlayMain.handleDisplayStatus(`Загружаем шаблон "${name}"! Ожидайте...`);
   }
-
-  const persistCoords = async () => {
-    try {
-      // data : {"data":{"tx":0,"ty":0,"px":0,"py":0},"message":"Wplace data"}
-
-      const wplace_data = await fetch(`${base_url}/wplace/data`);
-      const wplace_data_json = await wplace_data.json();
-      console.log("wplace_data_json", wplace_data_json);
-      const data = { "tx": wplace_data_json.data.tx, "ty": wplace_data_json.data.ty, "px": wplace_data_json.data.px, "py": wplace_data_json.data.py };
-      console.log("data", data);
-      GM.setValue('bmCoords', JSON.stringify(data));
-    } catch (_) {}
-  };
   
   overlayMain.addDiv({'id': 'bm-overlay', 'style': 'top: 10px; right: 75px;'})
     .addDiv({'id': 'bm-contain-header'})
@@ -512,10 +499,8 @@ function buildOverlayMain() {
     .addDiv({'id': 'bm-contain-automation'})
       .addButton({'id': 'bm-button-create', 'textContent': 'Обновить шаблоны'}, (instance, button) => {
         button.onclick = async () => {
-          // const input = document.querySelector('#bm-input-file-template');
-          const input = await fetch(`${base_url}/wplace/data`);
+          const input = await fetch(`${base_url}/wplace-api/data`);
           const input_json = await input.json();
-          console.log("input_json", input_json);
 
           GM.setValue('bmOptions', JSON.stringify(input_json));
 
@@ -523,7 +508,7 @@ function buildOverlayMain() {
           instance.handleDisplayStatus(`Скачиваем шаблон! Ожидайте...`);
         }
       }).buildElement()
-      .addDiv({'id': 'bm-contain-selector-templates'})
+      .addDiv({'id': 'bm-contain-selector-templates', 'style': 'margin-top: 10px;'})
       .addSelector({'id': 'bm-selector-templates'},
         (instance, selector) => {
           console.log("selector", selector);
@@ -577,9 +562,9 @@ function buildOverlayMain() {
       .addTextarea({'id': overlayMain.outputStatusId, 'placeholder': `Статус: Спит...\nВерсия: ${version}`, 'readOnly': true}).buildElement()
       .addDiv({'id': 'bm-contain-buttons-action'})
       .addDiv()
-        .addHyperLink({'href': 'https://t.me/YrodstvoDesinova', 'target': '_blank', 'textContent': 'Генерал: @MishaDesinov', 'style': 'text-decoration: none; font-size: 12px;'}).buildElement()
+        .addHyperLink({'href': 'https://t.me/YrodstvoDesinova', 'target': '_blank', 'textContent': 'Генерал: @MishaDesinov', 'style': 'font-size: 12px;'}).buildElement()
         .addDiv()
-        .addHyperLink({'href': 'https://freakland.egorrko.ru', 'target': '_blank', 'textContent': 'Разработчик: @Egorrko', 'style': 'text-decoration: none; font-size: 12px;'}).buildElement()
+        .addHyperLink({'href': 'https://freakland.egorrko.ru', 'target': '_blank', 'textContent': 'Разработчик: @Egorrko', 'style': 'font-size: 12px;'}).buildElement()
       .buildElement()
     .buildElement()
   .buildOverlay(document.body);
