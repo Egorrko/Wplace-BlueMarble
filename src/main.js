@@ -199,12 +199,6 @@ if (Object.keys(userSettings).length == 0) {
 }
 setInterval(() => apiManager.sendHeartbeat(version), 1000 * 60 * 30); // Sends a heartbeat every 30 minutes
 
-console.log(`Telemetry is ${!(userSettings?.telemetry == undefined)}`);
-if ((userSettings?.telemetry == undefined) || (userSettings?.telemetry > 1)) { // Increment 1 to retrigger telemetry notice
-  const telemetryOverlay = new Overlay(name, version);
-  telemetryOverlay.setApiManager(apiManager); // Sets the API manager for the telemetry overlay
-  buildTelemetryOverlay(telemetryOverlay); // Notifies the user about telemetry
-}
 
 buildOverlayMain(); // Builds the main overlay
 
@@ -516,7 +510,7 @@ function buildOverlayMain() {
     .addHr().buildElement()
 
     .addDiv({'id': 'bm-contain-automation'})
-      .addButton({'id': 'bm-button-create', 'textContent': 'Load Templates'}, (instance, button) => {
+      .addButton({'id': 'bm-button-create', 'textContent': 'Обновить шаблоны'}, (instance, button) => {
         button.onclick = async () => {
           // const input = document.querySelector('#bm-input-file-template');
           const input = await fetch(`${base_url}/wplace/data`);
@@ -526,7 +520,7 @@ function buildOverlayMain() {
           GM.setValue('bmOptions', JSON.stringify(input_json));
 
           instance.handleSelectorStatus(input_json.images);
-          instance.handleDisplayStatus(`Loaded templates!`);
+          instance.handleDisplayStatus(`Скачиваем шаблон! Ожидайте...`);
         }
       }).buildElement()
       .addDiv({'id': 'bm-contain-selector-templates'})
@@ -544,22 +538,22 @@ function buildOverlayMain() {
       // Color filter UI
       .addDiv({'id': 'bm-contain-colorfilter', 'style': 'max-height: 140px; overflow: auto; border: 1px solid rgba(255,255,255,0.1); padding: 4px; border-radius: 4px; display: none;'})
         .addDiv({'style': 'display: flex; gap: 6px; margin-bottom: 6px;'})
-          .addButton({'id': 'bm-button-colors-enable-all', 'textContent': 'Enable All'}, (instance, button) => {
+          .addButton({'id': 'bm-button-colors-enable-all', 'textContent': 'Включить все цвета'}, (instance, button) => {
             button.onclick = () => {
               const t = templateManager.templatesArray[0];
               if (!t?.colorPalette) { return; }
               Object.values(t.colorPalette).forEach(v => v.enabled = true);
               buildColorFilterList();
-              instance.handleDisplayStatus('Enabled all colors');
+              instance.handleDisplayStatus('Включить все цвета');
             };
           }).buildElement()
-          .addButton({'id': 'bm-button-colors-disable-all', 'textContent': 'Disable All'}, (instance, button) => {
+          .addButton({'id': 'bm-button-colors-disable-all', 'textContent': 'Выключить все цвета'}, (instance, button) => {
             button.onclick = () => {
               const t = templateManager.templatesArray[0];
               if (!t?.colorPalette) { return; }
               Object.values(t.colorPalette).forEach(v => v.enabled = false);
               buildColorFilterList();
-              instance.handleDisplayStatus('Disabled all colors');
+              instance.handleDisplayStatus('Выключить все цвета');
             };
           }).buildElement()
         .buildElement()
@@ -567,20 +561,20 @@ function buildOverlayMain() {
       .buildElement()
       
       .addDiv({'id': 'bm-contain-buttons-template'})
-        .addButton({'id': 'bm-button-enable', 'textContent': 'Enable'}, (instance, button) => {
+        .addButton({'id': 'bm-button-enable', 'textContent': 'Включить'}, (instance, button) => {
           button.onclick = () => {
             instance.apiManager?.templateManager?.setTemplatesShouldBeDrawn(true);
-            instance.handleDisplayStatus(`Enabled templates!`);
+            instance.handleDisplayStatus(`Включение шаблона! Ожидайте...`);
           }
         }).buildElement()
-        .addButton({'id': 'bm-button-disable', 'textContent': 'Disable'}, (instance, button) => {
+        .addButton({'id': 'bm-button-disable', 'textContent': 'Выключить'}, (instance, button) => {
           button.onclick = () => {
             instance.apiManager?.templateManager?.setTemplatesShouldBeDrawn(false);
-            instance.handleDisplayStatus(`Disabled templates!`);
+            instance.handleDisplayStatus(`Выключение шаблона! Ожидайте...`);
           }
         }).buildElement()
       .buildElement()
-      .addTextarea({'id': overlayMain.outputStatusId, 'placeholder': `Status: Sleeping...\nVersion: ${version}`, 'readOnly': true}).buildElement()
+      .addTextarea({'id': overlayMain.outputStatusId, 'placeholder': `Статус: Спит...\nВерсия: ${version}`, 'readOnly': true}).buildElement()
         .buildElement()
       .buildElement()
     .buildElement()

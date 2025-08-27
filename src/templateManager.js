@@ -128,7 +128,7 @@ export default class TemplateManager {
     // Creates the JSON object if it does not already exist
     if (!this.templatesJSON) {this.templatesJSON = await this.createJSON(); console.log(`Creating JSON...`);}
 
-    this.overlay.handleDisplayStatus(`Creating template at ${coords.join(', ')}...`);
+    this.overlay.handleDisplayStatus(`Генерация шаблона на ${coords.join(', ')}...`);
 
     // Creates a new template instance
     const template = new Template({
@@ -161,7 +161,7 @@ export default class TemplateManager {
     // Display pixel count statistics with internationalized number formatting
     // This provides immediate feedback to users about template complexity and size
     const pixelCountFormatted = new Intl.NumberFormat().format(template.pixelCount);
-    this.overlay.handleDisplayStatus(`Template created at ${coords.join(', ')}! Total pixels: ${pixelCountFormatted}`);
+    this.overlay.handleDisplayStatus(`Генерация шаблона на ${coords.join(', ')}! Общее количество пикселей: ${pixelCountFormatted}`);
 
     // Ensure color filter UI is visible when a template is created
     try {
@@ -518,10 +518,10 @@ export default class TemplateManager {
       const wrongStr = new Intl.NumberFormat().format(totalRequired - aggPainted); // Used to be aggWrong, but that is bugged
 
       this.overlay.handleDisplayStatus(
-        `Displaying ${templateCount} template${templateCount == 1 ? '' : 's'}.\nPainted ${paintedStr} / ${requiredStr} • Wrong ${wrongStr}`
+        `Отображение ${templateCount} шаблона${templateCount == 1 ? '' : 'ов'}.\nНарисовано ${paintedStr} / ${requiredStr} • Неправильно ${wrongStr}`
       );
     } else {
-      this.overlay.handleDisplayStatus(`Displaying ${templateCount} templates.`);
+      this.overlay.handleDisplayStatus(`Отображение ${templateCount} шаблона${templateCount == 1 ? '' : 'ов'}.`);
     }
 
     return await canvas.convertToBlob({ type: 'image/png' });

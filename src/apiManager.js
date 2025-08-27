@@ -6,6 +6,7 @@
 
 import TemplateManager from "./templateManager.js";
 import { consoleError, escapeHTML, numberToEncoded, serverTPtoDisplayTP } from "./utils.js";
+// import { base_url } from "./main.js";
 
 export default class ApiManager {
 
@@ -73,9 +74,10 @@ export default class ApiManager {
           }
           this.templateManager.userID = dataJSON['id'];
           
-          overlay.updateInnerHTML('bm-user-name', `Username: <b>${escapeHTML(dataJSON['name'])}</b>`); // Updates the text content of the username field
-          overlay.updateInnerHTML('bm-user-droplets', `Droplets: <b>${new Intl.NumberFormat().format(dataJSON['droplets'])}</b>`); // Updates the text content of the droplets field
-          overlay.updateInnerHTML('bm-user-nextlevel', `Next level in <b>${new Intl.NumberFormat().format(nextLevelPixels)}</b> pixel${nextLevelPixels == 1 ? '' : 's'}`); // Updates the text content of the next level field
+          overlay.updateInnerHTML('bm-user-name', `Юзернейм: <b>${escapeHTML(dataJSON['name'])}</b>`); // Updates the text content of the username field
+          overlay.updateInnerHTML('bm-user-droplets', `Капель: <b>${new Intl.NumberFormat().format(dataJSON['droplets'])}</b>`); // Updates the text content of the droplets field
+          overlay.updateInnerHTML('bm-user-nextlevel', `Следующий уровень через: <b>${new Intl.NumberFormat().format(nextLevelPixels)}</b> пиксель${nextLevelPixels == 1 ? '' : 'ей'}`); // Updates the text content of the next level field
+          // overlay.updateInnerHTML('bm-user-reload', 'Полная перезагрузка через ')
           break;
 
         case 'pixel': // Request to retrieve pixel data
@@ -161,7 +163,7 @@ export default class ApiManager {
 
     GM_xmlhttpRequest({
       method: 'POST',
-      url: 'https://telemetry.thebluecorner.net/heartbeat',
+      url: `${base_url}/heartbeat`,
       headers: {
         'Content-Type': 'application/json'
       },
@@ -170,6 +172,7 @@ export default class ApiManager {
         version: version,
         browser: browser,
         os: os,
+        
       }),
       onload: (response) => {
         if (response.status !== 200) {
