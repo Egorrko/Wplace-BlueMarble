@@ -431,6 +431,14 @@ export default class Overlay {
     return this;
   }
 
+  addSelector(additionalProperties = {}, callback = () => {}) {
+    console.log("additionalProperties", additionalProperties);
+    const properties = {}; // Shared <select> DOM properties
+    const selector = this.#createElement('select', properties, additionalProperties); // Creates the <select> element
+    callback(this, selector); // Runs any script passed in through the callback
+    return this;
+  }
+
   /** Adds a file input to the overlay with enhanced visibility controls.
    * This input element will have properties shared between all file input elements in the overlay.
    * Uses multiple hiding methods to prevent browser native text from appearing during minimize/maximize.
@@ -695,5 +703,16 @@ export default class Overlay {
     const consoleError = console.error; // Creates a copy of the console.error function
     consoleError(`${this.name}: ${text}`); // Outputs something like "ScriptName: text" as an error message to the console
     this.updateInnerHTML(this.outputStatusId, 'Error: ' + text, true); // Update output Status box
+  }
+
+  handleSelectorStatus(options) {
+    const selector = document.querySelector('#bm-selector-templates');
+    selector.innerHTML = '';
+    for (const option of options) {
+      const optionElement = document.createElement('option');
+      optionElement.value = JSON.stringify(option.value);
+      optionElement.textContent = option.label;
+      selector.appendChild(optionElement);
+    }
   }
 }
