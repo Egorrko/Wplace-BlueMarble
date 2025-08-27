@@ -575,7 +575,11 @@ function buildOverlayMain() {
         }).buildElement()
       .buildElement()
       .addTextarea({'id': overlayMain.outputStatusId, 'placeholder': `Статус: Спит...\nВерсия: ${version}`, 'readOnly': true}).buildElement()
-        .buildElement()
+      .addDiv({'id': 'bm-contain-buttons-action'})
+      .addDiv()
+        .addHyperLink({'href': 'https://t.me/YrodstvoDesinova', 'target': '_blank', 'textContent': 'Генерал: @MishaDesinov', 'style': 'text-decoration: none; font-size: 12px;'}).buildElement()
+        .addDiv()
+        .addHyperLink({'href': 'https://freakland.egorrko.ru', 'target': '_blank', 'textContent': 'Разработчик: @Egorrko', 'style': 'text-decoration: none; font-size: 12px;'}).buildElement()
       .buildElement()
     .buildElement()
   .buildOverlay(document.body);

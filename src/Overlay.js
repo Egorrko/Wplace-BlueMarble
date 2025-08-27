@@ -200,6 +200,13 @@ export default class Overlay {
     callback(this, small); // Runs any script passed in through the callback
     return this;
   }
+  
+  addHyperLink(additionalProperties = {}, callback = () => {}) {
+    const properties = {}; // Shared <a> DOM properties
+    const a = this.#createElement('a', properties, additionalProperties); // Creates the <a> element
+    callback(this, a); // Runs any script passed in through the callback
+    return this;
+  }
 
   /** Adds a `img` to the overlay.
    * This `img` element will have properties shared between all `img` elements in the overlay.
