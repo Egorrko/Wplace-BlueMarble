@@ -3,8 +3,8 @@
 /* The entire overlay */
 #bm-overlay, #bm-overlay-telemetry {
   position: fixed;
-  background-color: rgba(21, 48, 99, 0.9);
-  color: white;
+  background-color: rgba(182, 185, 202, 0.9);
+  color: black;
   padding: 10px;
   border-radius: 8px;
   z-index: 9000;
@@ -275,4 +275,14 @@ div:has(> #bm-input-file-template),
 /* All overlay buttons when disabled */
 #bm-overlay button:disabled, #bm-overlay-telemetry button:disabled {
   text-decoration: line-through;
+}
+
+/* The selector for templates */
+#bm-selector-templates {
+  background-color: #d1bf8e;
+}
+
+#bm-selector-templates:hover {
+  background-color: #75663a;
+  cursor: pointer;
 }
