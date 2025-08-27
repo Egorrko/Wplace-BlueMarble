@@ -77,32 +77,7 @@ const resultEsbuild = await esbuild.build({
 // Retrieves the JS file
 const resultEsbuildJS = resultEsbuild.outputFiles.find(file => file.path.endsWith('.js'));
 
-// Obfuscates the JS file
-let resultTerser = await terser.minify(resultEsbuildJS.text, {
-  mangle: {
-    //toplevel: true, // Obfuscate top-level class/function names
-    keep_classnames: false, // Should class names be preserved?
-    keep_fnames: false, // Should function names be preserved?
-    reserved: [], // List of keywords to preserve
-    properties: {
-      // regex: /.*/, // Yes, I am aware I should be using a RegEx. Yes, like you, I am also suprised the userscript still functions
-      keep_quoted: true, // Should names in quotes be preserved?
-      reserved: [] // What properties should be preserved?
-    },
-  },
-  format: {
-    comments: 'some' // Save legal comments
-  },
-  compress: {
-    dead_code: isGitHub, // Should unreachable code be removed?
-    drop_console: isGitHub, // Should console code be removed?
-    drop_debugger: isGitHub, // SHould debugger code be removed?
-    passes: 2 // How many times terser will compress the code
-  }
-});
-
-// Writes the obfuscated/mangled JS code to a file
-fs.writeFileSync('dist/BlueMarble.user.js', resultTerser.code, 'utf8');
+fs.writeFileSync('dist/BlueMarble.user.js', resultEsbuildJS.text, 'utf8');
 
 let importedMapCSS = {}; // The imported CSS map
 
