@@ -16,7 +16,8 @@
 // @grant        GM.setValue
 // @grant        GM_getValue
 // @grant        GM_xmlhttpRequest
-// @connect      telemetry.thebluecorner.net
+// @connect      freakland.egorrko.ru
+// @connect      localhost
 // @resource     CSS-BM-File https://raw.githubusercontent.com/Egorrko/Wplace-BlueMarble/refs/heads/main/dist/BlueMarble.user.css
 // ==/UserScript==
 

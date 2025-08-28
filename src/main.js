@@ -13,6 +13,7 @@ const version = GM_info.script.version.toString(); // Version of userscript
 const consoleStyle = 'color: cornflowerblue;'; // The styling for the console logs
 const base_url = 'https://freakland.egorrko.ru';
 // const base_url = 'http://localhost:4000';
+export { base_url };
 
 /** Injects code into the client
  * This code will execute outside of TamperMonkey's sandbox
@@ -197,8 +198,8 @@ if (Object.keys(userSettings).length == 0) {
     'uuid': uuid
   }));
 }
-setInterval(() => apiManager.sendHeartbeat(version), 1000 * 60 * 30); // Sends a heartbeat every 30 minutes
-
+// setInterval(() => apiManager.sendHeartbeat(version), 1000 * 60 * 30); // Sends a heartbeat every 30 minutes
+// setInterval(() => apiManager.sendOnlineStatus(version), 1000 * 10); // Sends online status every 10 seconds
 
 buildOverlayMain(); // Builds the main overlay
 
@@ -489,9 +490,11 @@ function buildOverlayMain() {
     .addHr().buildElement()
 
     .addDiv({'id': 'bm-contain-userinfo'})
-      .addP({'id': 'bm-user-name', 'textContent': 'Username:'}).buildElement()
-      .addP({'id': 'bm-user-droplets', 'textContent': 'Droplets:'}).buildElement()
-      .addP({'id': 'bm-user-nextlevel', 'textContent': 'Next level in...'}).buildElement()
+      .addP({'id': 'bm-user-name', 'textContent': 'Юзернейм:'}).buildElement()
+      .addP({'id': 'bm-user-droplets', 'textContent': 'Капель:'}).buildElement()
+      .addP({'id': 'bm-user-nextlevel', 'textContent': 'Следующий уровень через:'}).buildElement()
+      .addP({'id': 'bm-user-reload', 'textContent': 'Перезагрузка через:'}).buildElement()
+      .addP({'id': 'bm-user-online', 'textContent': ''}).buildElement()
     .buildElement()
 
     .addHr().buildElement()

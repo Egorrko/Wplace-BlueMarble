@@ -161,7 +161,7 @@ export default class TemplateManager {
     // Display pixel count statistics with internationalized number formatting
     // This provides immediate feedback to users about template complexity and size
     const pixelCountFormatted = new Intl.NumberFormat().format(template.pixelCount);
-    console.log("wtf???", coords)
+
     this.overlay.handleDisplayStatus(`Генерация шаблона на ${coords.join(', ')}! Общее количество пикселей: ${pixelCountFormatted}`);
 
     // Ensure color filter UI is visible when a template is created

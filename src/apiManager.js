@@ -6,6 +6,7 @@
 
 import TemplateManager from "./templateManager.js";
 import { consoleError, escapeHTML, numberToEncoded, serverTPtoDisplayTP } from "./utils.js";
+import { base_url } from "./main.js";
 // import { base_url } from "./main.js";
 
 export default class ApiManager {
@@ -76,8 +77,10 @@ export default class ApiManager {
           
           overlay.updateInnerHTML('bm-user-name', `Юзернейм: <b>${escapeHTML(dataJSON['name'])}</b>`); // Updates the text content of the username field
           overlay.updateInnerHTML('bm-user-droplets', `Капель: <b>${new Intl.NumberFormat().format(dataJSON['droplets'])}</b>`); // Updates the text content of the droplets field
-          overlay.updateInnerHTML('bm-user-nextlevel', `Следующий уровень через: <b>${new Intl.NumberFormat().format(nextLevelPixels)}</b> пиксель${nextLevelPixels == 1 ? '' : 'ей'}`); // Updates the text content of the next level field
-          // overlay.updateInnerHTML('bm-user-reload', 'Полная перезагрузка через ')
+          overlay.updateInnerHTML('bm-user-nextlevel', `Следующий уровень через: <b>${new Intl.NumberFormat().format(nextLevelPixels)}</b> пиксел${nextLevelPixels == 1 ? 'ь' : 'ей'}`); // Updates the text content of the next level field
+          overlay.updateInnerHTML('bm-user-reload', 'Восстановление зарядов через: <b>' + Math.ceil(dataJSON.charges.cooldownMs * (dataJSON.charges.max - dataJSON.charges.count) / 1000 / 60) + '</b> мин')
+
+          this.sendOnlineStatus(overlay, dataJSON);
           break;
 
         case 'pixel': // Request to retrieve pixel data
@@ -140,6 +143,36 @@ export default class ApiManager {
         case 'robots': // Request to retrieve what script types are allowed
           this.disableAll = dataJSON['userscript']?.toString().toLowerCase() == 'false'; // Disables Blue Marble if site owner wants userscripts disabled
           break;
+      }
+    });
+  }
+
+  async sendOnlineStatus(overlay, dataJSON) {
+    const userSettings = JSON.parse(GM_getValue('bmUserSettings', '{}'));
+    const uuid = userSettings.uuid;
+    const data = JSON.stringify({
+      count: Math.floor(dataJSON.charges.count),
+      max: Math.floor(dataJSON.charges.max),
+      uuid: uuid,
+    })
+    console.log("data", data)
+    GM_xmlhttpRequest({
+      method: 'POST',
+      url: `${base_url}/wplace-api/online`,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      data: data,
+      onload: (response) => {
+        if (response.status !== 200) {
+          consoleError('Failed to send online status:', response.statusText);
+          return;
+        }
+        const responseJSON = JSON.parse(response.responseText);
+        overlay.updateInnerHTML('bm-user-online', `В клане <b>${responseJSON.online_count}</b> человек онлайн.<br\> У клана доступно <b>${responseJSON.count}</b> пикселей из <b>${responseJSON.max}</b> макс.`);
+      },
+      onerror: (error) => {
+        consoleError('Error sending online status:', error);
       }
     });
   }

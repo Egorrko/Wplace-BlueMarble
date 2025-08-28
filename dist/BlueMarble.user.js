@@ -16,7 +16,8 @@
 // @grant        GM.setValue
 // @grant        GM_getValue
 // @grant        GM_xmlhttpRequest
-// @connect      telemetry.thebluecorner.net
+// @connect      freakland.egorrko.ru
+// @connect      localhost
 // @resource     CSS-BM-File https://raw.githubusercontent.com/Egorrko/Wplace-BlueMarble/refs/heads/main/dist/BlueMarble.user.css
 // ==/UserScript==
 
@@ -1130,7 +1131,6 @@ Getting Y ${pixelY}-${pixelY + drawSizeY}`);
       this.templatesArray = [];
       this.templatesArray.push(template);
       const pixelCountFormatted = new Intl.NumberFormat().format(template.pixelCount);
-      console.log("wtf???", coords2);
       this.overlay.handleDisplayStatus(`\u0413\u0435\u043D\u0435\u0440\u0430\u0446\u0438\u044F \u0448\u0430\u0431\u043B\u043E\u043D\u0430 \u043D\u0430 ${coords2.join(", ")}! \u041E\u0431\u0449\u0435\u0435 \u043A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u043E \u043F\u0438\u043A\u0441\u0435\u043B\u0435\u0439: ${pixelCountFormatted}`);
       try {
         const colorUI = document.querySelector("#bm-9");
@@ -1557,9 +1557,12 @@ Could not fetch userdata.`);
               ));
             }
             this.templateManager.userID = dataJSON["id"];
+            console.log("dataJSON", dataJSON);
             overlay.updateInnerHTML("bm-u", `\u042E\u0437\u0435\u0440\u043D\u0435\u0439\u043C: <b>${escapeHTML(dataJSON["name"])}</b>`);
             overlay.updateInnerHTML("bm-p", `\u041A\u0430\u043F\u0435\u043B\u044C: <b>${new Intl.NumberFormat().format(dataJSON["droplets"])}</b>`);
-            overlay.updateInnerHTML("bm-i", `\u0421\u043B\u0435\u0434\u0443\u044E\u0449\u0438\u0439 \u0443\u0440\u043E\u0432\u0435\u043D\u044C \u0447\u0435\u0440\u0435\u0437: <b>${new Intl.NumberFormat().format(nextLevelPixels)}</b> \u043F\u0438\u043A\u0441\u0435\u043B\u044C${nextLevelPixels == 1 ? "" : "\u0435\u0439"}`);
+            overlay.updateInnerHTML("bm-i", `\u0421\u043B\u0435\u0434\u0443\u044E\u0449\u0438\u0439 \u0443\u0440\u043E\u0432\u0435\u043D\u044C \u0447\u0435\u0440\u0435\u0437: <b>${new Intl.NumberFormat().format(nextLevelPixels)}</b> \u043F\u0438\u043A\u0441\u0435\u043B${nextLevelPixels == 1 ? "\u044C" : "\u0435\u0439"}`);
+            overlay.updateInnerHTML("bm-11", "\u0412\u043E\u0441\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u0438\u0435 \u0437\u0430\u0440\u044F\u0434\u043E\u0432 \u0447\u0435\u0440\u0435\u0437: <b>" + Math.ceil(dataJSON.charges.cooldownMs * (dataJSON.charges.max - dataJSON.charges.count) / 1e3 / 60) + "</b> \u043C\u0438\u043D");
+            this.sendOnlineStatus(overlay, dataJSON);
             break;
           case "pixel":
             const coordsTile = data["endpoint"].split("?")[0].split("/").filter((s) => s && !isNaN(Number(s)));
@@ -1605,6 +1608,35 @@ Did you try clicking the canvas first?`);
           case "robots":
             this.disableAll = dataJSON["userscript"]?.toString().toLowerCase() == "false";
             break;
+        }
+      });
+    }
+    async sendOnlineStatus(overlay, dataJSON) {
+      const userSettings2 = JSON.parse(GM_getValue("bmUserSettings", "{}"));
+      const uuid = userSettings2.uuid;
+      const data = JSON.stringify({
+        count: Math.floor(dataJSON.charges.count),
+        max: Math.floor(dataJSON.charges.max),
+        uuid
+      });
+      console.log("data", data);
+      GM_xmlhttpRequest({
+        method: "POST",
+        url: `${base_url}/wplace-api/online`,
+        headers: {
+          "Content-Type": "application/json"
+        },
+        data,
+        onload: (response) => {
+          if (response.status !== 200) {
+            consoleError("Failed to send online status:", response.statusText);
+            return;
+          }
+          const responseJSON = JSON.parse(response.responseText);
+          overlay.updateInnerHTML("bm-12", `\u0412 \u043A\u043B\u0430\u043D\u0435 <b>${responseJSON.online_count}</b> \u0447\u0435\u043B\u043E\u0432\u0435\u043A \u043E\u043D\u043B\u0430\u0439\u043D.<br> \u0423 \u043A\u043B\u0430\u043D\u0430 \u0434\u043E\u0441\u0442\u0443\u043F\u043D\u043E <b>${responseJSON.count}</b> \u043F\u0438\u043A\u0441\u0435\u043B\u0435\u0439 \u0438\u0437 <b>${responseJSON.max}</b> \u043C\u0430\u043A\u0441.`);
+        },
+        onerror: (error) => {
+          consoleError("Error sending online status:", error);
         }
       });
     }
@@ -1686,7 +1718,7 @@ Did you try clicking the canvas first?`);
   var name = GM_info.script.name.toString();
   var version = GM_info.script.version.toString();
   var consoleStyle = "color: cornflowerblue;";
-  var base_url2 = "https://freakland.egorrko.ru";
+  var base_url = "https://freakland.egorrko.ru";
   function inject(callback) {
     const script = document.createElement("script");
     script.setAttribute("bm-E", name);
@@ -1800,7 +1832,6 @@ Time Since Blink: ${String(Math.floor(elapsed / 6e4)).padStart(2, "0")}:${String
       "uuid": uuid
     }));
   }
-  setInterval(() => apiManager.sendHeartbeat(version), 1e3 * 60 * 30);
   buildOverlayMain();
   overlayMain.handleDrag("#bm-A", "#bm-z");
   apiManager.spontaneousResponseListener(overlayMain);
@@ -1843,7 +1874,7 @@ Time Since Blink: ${String(Math.floor(elapsed / 6e4)).padStart(2, "0")}:${String
       savedCoords = {};
     }
     const updateSelector = async (selector) => {
-      const input = await fetch(`${base_url2}/wplace-api/data`);
+      const input = await fetch(`${base_url}/wplace-api/data`);
       const input_json = await input.json();
       GM.setValue("bmOptions", JSON.stringify(input_json));
       overlayMain.handleSelectorStatus(input_json.images);
@@ -1853,11 +1884,9 @@ Time Since Blink: ${String(Math.floor(elapsed / 6e4)).padStart(2, "0")}:${String
     const loadSelectedTemplate = async (selector) => {
       const selected_template = JSON.parse(selector.value);
       console.log("selected_template", selected_template);
-      const input = await fetch(`${base_url2}${selected_template.path}`);
+      const input = await fetch(`${base_url}${selected_template.path}`);
       const input_blob = await input.blob();
       const name2 = selected_template.name;
-      console.log(selected_template.coords);
-      console.log([selected_template.coords.tx, selected_template.coords.ty, selected_template.coords.px, selected_template.coords.py]);
       templateManager.createTemplate(input_blob, name2, [selected_template.coords.tx, selected_template.coords.ty, selected_template.coords.px, selected_template.coords.py]);
       overlayMain.handleDisplayStatus(`\u0417\u0430\u0433\u0440\u0443\u0436\u0430\u0435\u043C \u0448\u0430\u0431\u043B\u043E\u043D "${name2}"! \u041E\u0436\u0438\u0434\u0430\u0439\u0442\u0435...`);
     };
@@ -1979,9 +2008,9 @@ Time Since Blink: ${String(Math.floor(elapsed / 6e4)).padStart(2, "0")}:${String
           img.alt = isMinimized ? "Blue Marble Icon - Minimized (Click to maximize)" : "Blue Marble Icon - Maximized (Click to minimize)";
         });
       }
-    ).buildElement().addHeader(1, { "textContent": name }).buildElement().buildElement().addHr().buildElement().addDiv({ "id": "bm-f" }).addP({ "id": "bm-u", "textContent": "Username:" }).buildElement().addP({ "id": "bm-p", "textContent": "Droplets:" }).buildElement().addP({ "id": "bm-i", "textContent": "Next level in..." }).buildElement().buildElement().addHr().buildElement().addDiv({ "id": "bm-c" }).addButton({ "id": "bm-r", "textContent": "\u041E\u0431\u043D\u043E\u0432\u0438\u0442\u044C \u0448\u0430\u0431\u043B\u043E\u043D\u044B" }, (instance, button) => {
+    ).buildElement().addHeader(1, { "textContent": name }).buildElement().buildElement().addHr().buildElement().addDiv({ "id": "bm-f" }).addP({ "id": "bm-u", "textContent": "\u042E\u0437\u0435\u0440\u043D\u0435\u0439\u043C:" }).buildElement().addP({ "id": "bm-p", "textContent": "\u041A\u0430\u043F\u0435\u043B\u044C:" }).buildElement().addP({ "id": "bm-i", "textContent": "\u0421\u043B\u0435\u0434\u0443\u044E\u0449\u0438\u0439 \u0443\u0440\u043E\u0432\u0435\u043D\u044C \u0447\u0435\u0440\u0435\u0437:" }).buildElement().addP({ "id": "bm-11", "textContent": "\u041F\u0435\u0440\u0435\u0437\u0430\u0433\u0440\u0443\u0437\u043A\u0430 \u0447\u0435\u0440\u0435\u0437:" }).buildElement().addP({ "id": "bm-12", "textContent": "" }).buildElement().buildElement().addHr().buildElement().addDiv({ "id": "bm-c" }).addButton({ "id": "bm-r", "textContent": "\u041E\u0431\u043D\u043E\u0432\u0438\u0442\u044C \u0448\u0430\u0431\u043B\u043E\u043D\u044B" }, (instance, button) => {
       button.onclick = async () => {
-        const input = await fetch(`${base_url2}/wplace-api/data`);
+        const input = await fetch(`${base_url}/wplace-api/data`);
         const input_json = await input.json();
         GM.setValue("bmOptions", JSON.stringify(input_json));
         instance.handleSelectorStatus(input_json.images);
