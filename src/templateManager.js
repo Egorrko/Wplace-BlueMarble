@@ -157,6 +157,7 @@ export default class TemplateManager {
     };
 
     this.templatesArray = []; // Remove this to enable multiple templates (2/2)
+    this.tileProgress.clear();
     this.templatesArray.push(template); // Pushes the Template object instance to the Template Array
 
     // ==================== PIXEL COUNT DISPLAY SYSTEM ====================
