@@ -22,6 +22,7 @@ export default class Template {
    */
   constructor({
     displayName = 'My template',
+    template_id = null,
     sortID = 0,
     authorID = '',
     url = '',
@@ -31,6 +32,7 @@ export default class Template {
     tileSize = 1000,
   } = {}) {
     this.displayName = displayName;
+    this.template_id = template_id;
     this.sortID = sortID;
     this.authorID = authorID;
     this.url = url;

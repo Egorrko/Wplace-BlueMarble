@@ -133,6 +133,7 @@ export default class TemplateManager {
     // Creates a new template instance
     const template = new Template({
       displayName: name,
+      template_id: template_id,
       sortID: 0, // Object.keys(this.templatesJSON.templates).length || 0, // Uncomment this to enable multiple templates (1/2)
       authorID: numberToEncoded(this.userID || 0, this.encodingBase),
       file: blob,

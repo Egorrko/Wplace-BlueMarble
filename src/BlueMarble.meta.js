@@ -10,6 +10,7 @@
 // @grant        GM_getValue
 // @grant        GM_xmlhttpRequest
 // @connect      freakland.egorrko.ru
+// @connect      localhost
 // ==/UserScript==
 
 // Wplace  --> https://wplace.live

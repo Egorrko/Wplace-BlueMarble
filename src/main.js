@@ -206,8 +206,23 @@ setInterval(() => {
   if (Object.keys(userPixels).length == 0) {
     return;
   }
-  overlayMain.updateInnerHTML('bm-user-reload', 'Восстановление зарядов через: <b>' + Math.ceil(userPixels.cooldownMs * (userPixels.max - userPixels.count) / 1000) + '</b> мин ');
-}, 10_000);
+  const timeSinceUpdate = Date.now() - userPixels.updated;
+  overlayMain.updateInnerHTML('bm-user-reload', 'Восстановление зарядов через: <b>' + Math.ceil((userPixels.cooldownMs * (userPixels.max - userPixels.count) / 1000 - timeSinceUpdate / 1000) / 60)  + '</b> мин ');
+}, 5_000);
+
+setInterval(() => {
+  GM.xmlHttpRequest({
+    method: 'GET',
+    url: `${telemetry_url}/wplace-api/online`,
+    onload: (response) => {
+      const data = JSON.parse(response.responseText);
+      overlayMain.updateInnerHTML('bm-user-online', `В клане <b>${data.online_count}</b> человек онлайн.<br> У клана доступно <b>${data.count}</b> пикселей из <b>${data.max}</b> макс.`);
+    },
+    onerror: (error) => {
+    }
+  });
+}, 20_000);
+
 buildOverlayMain(); // Builds the main overlay
 
 overlayMain.handleDrag('#bm-overlay', '#bm-bar-drag'); // Creates dragging capability on the drag bar for dragging the overlay
@@ -507,17 +522,6 @@ function buildOverlayMain() {
     .addHr().buildElement()
 
     .addDiv({'id': 'bm-contain-automation'})
-      .addButton({'id': 'bm-button-create', 'textContent': 'Обновить шаблоны'}, (instance, button) => {
-        button.onclick = async () => {
-          const input = await fetch(`${data_url}/data.json`);
-          const input_json = await input.json();
-
-          GM.setValue('bmOptions', JSON.stringify(input_json));
-
-          instance.handleSelectorStatus(input_json.images);
-          instance.handleDisplayStatus(`Скачиваем шаблон! Ожидайте...`);
-        }
-      }).buildElement()
       .addDiv({'id': 'bm-contain-selector-templates', 'style': 'margin-top: 10px;'})
       .addSelector({'id': 'bm-selector-templates'},
         async (instance, selector) => {
