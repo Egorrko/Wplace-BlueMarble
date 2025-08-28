@@ -48,18 +48,16 @@ try {
 // Fetches the userscript metadata banner
 const metaContent = fs.readFileSync('src/BlueMarble.meta.js', 'utf8');
 
-// Compiles a string array of all CSS files
-const cssFiles = fs.readdirSync('src/')
-  .filter(file => file.endsWith('.css'))
-  .map(file => `src/${file}`);
-
 // Compiles the CSS files
-esbuild.build({
-  entryPoints: cssFiles,
+const resultCss = await esbuild.build({
+  entryPoints: ['src/main.css'], 
   bundle: true,
-  outfile: 'dist/BlueMarble.user.css',
-  minify: true
-});
+  minify: true,
+  write: false,
+}).catch(() => process.exit(1));
+
+const cssContent = resultCss.outputFiles[0].text;
+
 
 // Compiles the JS files
 const resultEsbuild = await esbuild.build({
@@ -70,42 +68,17 @@ const resultEsbuild = await esbuild.build({
   target: 'es2020', // What is the minimum version/year that should be supported? When omited, it attempts to support backwards compatability with legacy browsers
   platform: 'browser', // The platform the bundled code will be operating on
   legalComments: 'inline', // What level of legal comments are preserved? (Hard: none, Soft: inline)
-  minify: false, // Should the code be minified?
+  minify: true, // Should the code be minified?
   write: false, // Should we write the outfile to the disk?
+  define: {
+    'INJECTED_CSS': JSON.stringify(cssContent)
+  }
 }).catch(() => process.exit(1));
 
 // Retrieves the JS file
 const resultEsbuildJS = resultEsbuild.outputFiles.find(file => file.path.endsWith('.js'));
 
 fs.writeFileSync('dist/BlueMarble.user.js', resultEsbuildJS.text, 'utf8');
-
-let importedMapCSS = {}; // The imported CSS map
-
-// Only import a CSS map if we are NOT in production (GitHub Workflow)
-// Theoretically, if the previous map is always imported, the names would not scramble. However, the names would never decrease in number...
-if (!isGitHub) {
-  try {
-    importedMapCSS = JSON.parse(fs.readFileSync('dist/BlueMarble.user.css.map.json', 'utf8'));
-  } catch {
-    console.log(`${consoleStyle.YELLOW}Warning! Could not find a CSS map to import. A 100% new CSS map will be generated...${consoleStyle.RESET}`);
-  }
-}
-
-// Mangles the CSS selectors
-// If we are in production (GitHub Workflow), then generate the CSS mapping
-const mapCSS = mangleSelectors({
-  inputPrefix: 'bm-',
-  outputPrefix: 'bm-',
-  pathJS: 'dist/BlueMarble.user.js',
-  pathCSS: 'dist/BlueMarble.user.css',
-  importMap: importedMapCSS,
-  returnMap: isGitHub
-});
-
-// If a map was returned, write it to the file
-if (mapCSS) {
-  fs.writeFileSync('dist/BlueMarble.user.css.map.json', JSON.stringify(mapCSS, null, 2));
-}
 
 // Adds the banner
 fs.writeFileSync(

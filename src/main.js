@@ -6,14 +6,16 @@ import Overlay from './Overlay.js';
 import Observers from './observers.js';
 import ApiManager from './apiManager.js';
 import TemplateManager from './templateManager.js';
+import Choices from './choices-esm.min.js';
 import { consoleLog, consoleWarn, selectAllCoordinateInputs } from './utils.js';
 
 const name = GM_info.script.name.toString(); // Name of userscript
 const version = GM_info.script.version.toString(); // Version of userscript
 const consoleStyle = 'color: cornflowerblue;'; // The styling for the console logs
-const base_url = 'https://freakland.egorrko.ru';
-// const base_url = 'http://localhost:4000';
-export { base_url };
+const data_url = 'https://raw.githubusercontent.com/Egorrko/wplace-templates/refs/heads/main/';
+const telemetry_url = 'https://freakland.egorrko.ru';
+// const telemetry_url = 'http://localhost:4000';
+export { telemetry_url };
 
 /** Injects code into the client
  * This code will execute outside of TamperMonkey's sandbox
@@ -161,8 +163,7 @@ inject(() => {
 });
 
 // Imports the CSS file from dist folder on github
-const cssOverlay = GM_getResourceText("CSS-BM-File");
-GM_addStyle(cssOverlay);
+GM_addStyle(INJECTED_CSS);
 
 // Imports the Roboto Mono font family
 var stylesheetLink = document.createElement('link');
@@ -200,7 +201,13 @@ if (Object.keys(userSettings).length == 0) {
 }
 // setInterval(() => apiManager.sendHeartbeat(version), 1000 * 60 * 30); // Sends a heartbeat every 30 minutes
 // setInterval(() => apiManager.sendOnlineStatus(version), 1000 * 10); // Sends online status every 10 seconds
-
+setInterval(() => {
+  const userPixels = JSON.parse(GM_getValue('bmUserPixels', '{}'));
+  if (Object.keys(userPixels).length == 0) {
+    return;
+  }
+  overlayMain.updateInnerHTML('bm-user-reload', 'Восстановление зарядов через: <b>' + Math.ceil(userPixels.cooldownMs * (userPixels.max - userPixels.count) / 1000) + '</b> мин ');
+}, 10_000);
 buildOverlayMain(); // Builds the main overlay
 
 overlayMain.handleDrag('#bm-overlay', '#bm-bar-drag'); // Creates dragging capability on the drag bar for dragging the overlay
@@ -262,7 +269,7 @@ function buildOverlayMain() {
   let savedCoords = {};
   try { savedCoords = JSON.parse(GM_getValue('bmCoords', '{}')) || {}; } catch (_) { savedCoords = {}; }
   const updateSelector = async (selector) => {
-    const input = await fetch(`${base_url}/wplace-api/data`);
+    const input = await fetch(`${data_url}/data.json`);
     const input_json = await input.json();
 
     GM.setValue('bmOptions', JSON.stringify(input_json));
@@ -276,11 +283,11 @@ function buildOverlayMain() {
   const loadSelectedTemplate = async (selector) => {
     const selected_template = JSON.parse(selector.value);
     console.log("selected_template", selected_template);
-    const input = await fetch(`${base_url}${selected_template.path}`);
+    const input = await fetch(`${data_url}${selected_template.path}`);
     const input_blob = await input.blob();
     const name = selected_template.name;
 
-    templateManager.createTemplate(input_blob, name, [selected_template.coords.tx, selected_template.coords.ty, selected_template.coords.px, selected_template.coords.py]);
+    templateManager.createTemplate(input_blob, selected_template.id, name, [selected_template.coords.tx, selected_template.coords.ty, selected_template.coords.px, selected_template.coords.py]);
     overlayMain.handleDisplayStatus(`Загружаем шаблон "${name}"! Ожидайте...`);
   }
   
@@ -493,7 +500,7 @@ function buildOverlayMain() {
       .addP({'id': 'bm-user-name', 'textContent': 'Юзернейм:'}).buildElement()
       .addP({'id': 'bm-user-droplets', 'textContent': 'Капель:'}).buildElement()
       .addP({'id': 'bm-user-nextlevel', 'textContent': 'Следующий уровень через:'}).buildElement()
-      .addP({'id': 'bm-user-reload', 'textContent': 'Перезагрузка через:'}).buildElement()
+      .addP({'id': 'bm-user-reload', 'textContent': ''}).buildElement()
       .addP({'id': 'bm-user-online', 'textContent': ''}).buildElement()
     .buildElement()
 
@@ -502,7 +509,7 @@ function buildOverlayMain() {
     .addDiv({'id': 'bm-contain-automation'})
       .addButton({'id': 'bm-button-create', 'textContent': 'Обновить шаблоны'}, (instance, button) => {
         button.onclick = async () => {
-          const input = await fetch(`${base_url}/wplace-api/data`);
+          const input = await fetch(`${data_url}/data.json`);
           const input_json = await input.json();
 
           GM.setValue('bmOptions', JSON.stringify(input_json));
@@ -513,13 +520,19 @@ function buildOverlayMain() {
       }).buildElement()
       .addDiv({'id': 'bm-contain-selector-templates', 'style': 'margin-top: 10px;'})
       .addSelector({'id': 'bm-selector-templates'},
-        (instance, selector) => {
+        async (instance, selector) => {
           console.log("selector", selector);
-          updateSelector(selector);
+          await updateSelector(selector);
 
-          selector.onchange = async () => {
+          const choices = new Choices(selector, {
+            shouldSort: false,
+            searchEnabled: false,
+            itemSelectText: '',
+          });
+
+          selector.addEventListener('change', async (event) => {
             loadSelectedTemplate(selector);
-          }
+          });
         }
       ).buildElement()
       .buildElement()

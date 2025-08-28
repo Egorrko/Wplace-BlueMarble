@@ -1,0 +1,21 @@
+@import "./choices.min.css";
+@import "./overlay.css";
+
+.choices {
+    font-size: 14px;
+  }
+  
+  .choices__inner {
+    min-height: auto;
+    padding: 4px 8px;
+  }
+  
+  .choices__list--dropdown .choices__item--choice {
+    font-size: 14px;
+    padding: 6px 10px;
+  }
+  
+  .choices__list--dropdown .choices__item--choice .choices__item-text {
+      white-space: normal;
+      word-wrap: break-word;
+  }

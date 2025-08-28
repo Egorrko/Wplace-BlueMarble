@@ -123,7 +123,7 @@ export default class TemplateManager {
    * @param {Array<number, number, number, number>} coords - The coordinates of the top left corner of the template
    * @since 0.65.77
    */
-  async createTemplate(blob, name, coords) {
+  async createTemplate(blob, template_id, name, coords) {
 
     // Creates the JSON object if it does not already exist
     if (!this.templatesJSON) {this.templatesJSON = await this.createJSON(); console.log(`Creating JSON...`);}
@@ -148,6 +148,7 @@ export default class TemplateManager {
     template.storageKey = storageKey;
     this.templatesJSON.templates[storageKey] = {
       "name": template.displayName, // Display name of template
+      "template_id": template_id,
       "coords": coords.join(', '), // The coords of the template
       "enabled": true,
       "tiles": templateTilesBuffers, // Stores the chunked tile buffers

@@ -6,8 +6,7 @@
 
 import TemplateManager from "./templateManager.js";
 import { consoleError, escapeHTML, numberToEncoded, serverTPtoDisplayTP } from "./utils.js";
-import { base_url } from "./main.js";
-// import { base_url } from "./main.js";
+import { telemetry_url } from "./main.js";
 
 export default class ApiManager {
 
@@ -78,6 +77,7 @@ export default class ApiManager {
           overlay.updateInnerHTML('bm-user-name', `Юзернейм: <b>${escapeHTML(dataJSON['name'])}</b>`); // Updates the text content of the username field
           overlay.updateInnerHTML('bm-user-droplets', `Капель: <b>${new Intl.NumberFormat().format(dataJSON['droplets'])}</b>`); // Updates the text content of the droplets field
           overlay.updateInnerHTML('bm-user-nextlevel', `Следующий уровень через: <b>${new Intl.NumberFormat().format(nextLevelPixels)}</b> пиксел${nextLevelPixels == 1 ? 'ь' : 'ей'}`); // Updates the text content of the next level field
+          GM_setValue('bmUserPixels', JSON.stringify({count: dataJSON.charges.count, max: dataJSON.charges.max, cooldownMs: dataJSON.charges.cooldownMs}));
           overlay.updateInnerHTML('bm-user-reload', 'Восстановление зарядов через: <b>' + Math.ceil(dataJSON.charges.cooldownMs * (dataJSON.charges.max - dataJSON.charges.count) / 1000 / 60) + '</b> мин')
 
           this.sendOnlineStatus(overlay, dataJSON);
@@ -154,11 +154,12 @@ export default class ApiManager {
       count: Math.floor(dataJSON.charges.count),
       max: Math.floor(dataJSON.charges.max),
       uuid: uuid,
+      template_id: this.templateManager.templatesArray[0].template_id,
     })
     console.log("data", data)
     GM_xmlhttpRequest({
       method: 'POST',
-      url: `${base_url}/wplace-api/online`,
+      url: `${telemetry_url}/wplace-api/online`,
       headers: {
         'Content-Type': 'application/json'
       },
@@ -196,7 +197,7 @@ export default class ApiManager {
 
     GM_xmlhttpRequest({
       method: 'POST',
-      url: `${base_url}/heartbeat`,
+      url: `${telemetry_url}/heartbeat`,
       headers: {
         'Content-Type': 'application/json'
       },
