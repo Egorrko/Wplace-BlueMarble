@@ -202,7 +202,12 @@ setInterval(() => {
     return;
   }
   const timeSinceUpdate = Date.now() - userPixels.updated;
-  overlayMain.updateInnerHTML('bm-user-reload', 'Восстановление зарядов через: <b>' + Math.ceil((userPixels.cooldownMs * (userPixels.max - userPixels.count) / 1000 - timeSinceUpdate / 1000) / 60)  + '</b> мин ');
+  const timeToReload = Math.ceil((userPixels.cooldownMs * (userPixels.max - userPixels.count) / 1000 - timeSinceUpdate / 1000) / 60);
+  if (timeToReload > 0) {
+    overlayMain.updateInnerHTML('bm-user-reload', 'Восстановление зарядов через: <b>' + timeToReload  + '</b> мин ');
+  } else {
+    overlayMain.updateInnerHTML('bm-user-reload', 'Восстановление зарядов через: <b>0</b> мин ');
+  }
 }, 5_000);
 
 setInterval(() => {
