@@ -439,7 +439,6 @@ export default class Overlay {
   }
 
   addSelector(additionalProperties = {}, callback = () => {}) {
-    console.log("additionalProperties", additionalProperties);
     const properties = {}; // Shared <select> DOM properties
     const selector = this.#createElement('select', properties, additionalProperties); // Creates the <select> element
     callback(this, selector); // Runs any script passed in through the callback

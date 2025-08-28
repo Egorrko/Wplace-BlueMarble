@@ -50,7 +50,6 @@ inject(() => {
     // Since this code does not run in the userscript, we can't use consoleLog().
     console.groupCollapsed(`%c${name}%c: ${fetchedBlobQueue.size} Recieved IMAGE message about blob "${blobID}"`, consoleStyle, '');
     console.log(`Blob fetch took %c${String(Math.floor(elapsed/60000)).padStart(2,'0')}:${String(Math.floor(elapsed/1000) % 60).padStart(2,'0')}.${String(elapsed % 1000).padStart(3,'0')}%c MM:SS.mmm`, consoleStyle, '');
-    console.log(fetchedBlobQueue);
     console.groupEnd();
 
     // The modified blob won't have an endpoint, so we ignore any message without one.
@@ -186,15 +185,11 @@ const apiManager = new ApiManager(templateManager); // Constructs a new ApiManag
 overlayMain.setApiManager(apiManager); // Sets the API manager
 
 const storageTemplates = JSON.parse(GM_getValue('bmTemplates', '{}'));
-console.log(storageTemplates);
 templateManager.importJSON(storageTemplates); // Loads the templates
 
 const userSettings = JSON.parse(GM_getValue('bmUserSettings', '{}')); // Loads the user settings
-console.log(userSettings);
-console.log(Object.keys(userSettings).length);
 if (Object.keys(userSettings).length == 0) {
   const uuid = crypto.randomUUID(); // Generates a random UUID
-  console.log(uuid);
   GM.setValue('bmUserSettings', JSON.stringify({
     'uuid': uuid
   }));
@@ -297,7 +292,6 @@ function buildOverlayMain() {
 
   const loadSelectedTemplate = async (selector) => {
     const selected_template = JSON.parse(selector.value);
-    console.log("selected_template", selected_template);
     const input = await fetch(`${data_url}${selected_template.path}`);
     const input_blob = await input.blob();
     const name = selected_template.name;
@@ -525,7 +519,6 @@ function buildOverlayMain() {
       .addDiv({'id': 'bm-contain-selector-templates', 'style': 'margin-top: 10px;'})
       .addSelector({'id': 'bm-selector-templates'},
         async (instance, selector) => {
-          console.log("selector", selector);
           await updateSelector(selector);
 
           const choices = new Choices(selector, {

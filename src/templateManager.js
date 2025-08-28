@@ -174,11 +174,6 @@ export default class TemplateManager {
       window.postMessage({ source: 'blue-marble', bmEvent: 'bm-rebuild-color-list' }, '*');
     } catch (_) { /* no-op */ }
 
-    console.log(Object.keys(this.templatesJSON.templates).length);
-    console.log(this.templatesJSON);
-    console.log(this.templatesArray);
-    console.log(JSON.stringify(this.templatesJSON));
-
     await this.#storeTemplates();
   }
 
@@ -231,12 +226,9 @@ export default class TemplateManager {
     console.log(`Searching for templates in tile: "${tileCoords}"`);
 
     const templateArray = this.templatesArray; // Stores a copy for sorting
-    console.log(templateArray);
 
     // Sorts the array of Template class instances. 0 = first = lowest draw priority
     templateArray.sort((a, b) => {return a.sortID - b.sortID;});
-
-    console.log(templateArray);
 
     // Early exit if none of the active templates touch this tile
     const anyTouches = templateArray.some(t => {
@@ -275,10 +267,7 @@ export default class TemplateManager {
       })
     .filter(Boolean);
 
-    console.log(templatesToDraw);
-
     const templateCount = templatesToDraw?.length || 0; // Number of templates to draw on this tile
-    console.log(`templateCount = ${templateCount}`);
 
     // We'll compute per-tile painted/wrong/required counts when templates exist for this tile
     let paintedCount = 0;
@@ -310,8 +299,6 @@ export default class TemplateManager {
 
     // For each template in this tile, draw them.
     for (const template of templatesToDraw) {
-      console.log(`Template:`);
-      console.log(template);
 
       // Compute stats by sampling template center pixels against tile pixels,
       // honoring color enable/disable from the active template's palette
@@ -535,9 +522,6 @@ export default class TemplateManager {
    */
   importJSON(json) {
 
-    console.log(`Importing JSON...`);
-    console.log(json);
-
     // If the passed in JSON is a Blue Marble template object...
     if (json?.whoami == 'BlueMarble') {
       this.#parseBlueMarble(json); // ...parse the template object as Blue Marble
@@ -562,7 +546,6 @@ export default class TemplateManager {
 
         const templateKey = template;
         const templateValue = templates[template];
-        console.log(templateKey);
 
         if (templates.hasOwnProperty(template)) {
 
@@ -577,7 +560,6 @@ export default class TemplateManager {
           const paletteMap = new Map(); // Accumulates color counts across tiles (center pixels only)
 
           for (const tile in tilesbase64) {
-            console.log(tile);
             if (tilesbase64.hasOwnProperty(tile)) {
               const encodedTemplateBase64 = tilesbase64[tile];
               const templateUint8Array = base64ToUint8(encodedTemplateBase64); // Base 64 -> Uint8Array
@@ -649,8 +631,6 @@ export default class TemplateManager {
           // Store storageKey for later writes
           template.storageKey = templateKey;
           this.templatesArray.push(template);
-          console.log(this.templatesArray);
-          console.log(`^^^ This ^^^`);
         }
       }
       // After importing templates from storage, reveal color UI and request palette list build
