@@ -12,7 +12,8 @@ import { consoleLog, consoleWarn, selectAllCoordinateInputs } from './utils.js';
 const name = GM_info.script.name.toString(); // Name of userscript
 const version = GM_info.script.version.toString(); // Version of userscript
 const consoleStyle = 'color: cornflowerblue;'; // The styling for the console logs
-const data_url = 'https://raw.githubusercontent.com/Egorrko/wplace-templates/refs/heads/main/';
+const data_url = 'https://raw.githubusercontent.com/Egorrko/wplace-templates/refs/heads/main';
+// const data_url = 'http://localhost:4000/wplace-api';
 const telemetry_url = 'https://freakland.egorrko.ru';
 // const telemetry_url = 'http://localhost:4000';
 export { telemetry_url };

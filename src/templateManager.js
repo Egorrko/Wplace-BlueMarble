@@ -143,9 +143,14 @@ export default class TemplateManager {
     const { templateTiles, templateTilesBuffers } = await template.createTemplateTiles(this.tileSize); // Chunks the tiles
     template.chunked = templateTiles; // Stores the chunked tile bitmaps
 
+    this.templatesJSON = await this.createJSON();
+    this.templatesArray = []; // Remove this to enable multiple templates (2/2)
+    this.tileProgress.clear();
+    this.templatesArray.push(template); // Pushes the Template object instance to the Template Array
+
     // Appends a child into the templates object
     // The child's name is the number of templates already in the list (sort order) plus the encoded player ID
-    const storageKey = `${template.sortID} ${template.authorID}`;
+    const storageKey = `${template.sortID} ${template.authorID} ${template.template_id}`;
     template.storageKey = storageKey;
     this.templatesJSON.templates[storageKey] = {
       "name": template.displayName, // Display name of template
@@ -155,10 +160,6 @@ export default class TemplateManager {
       "tiles": templateTilesBuffers, // Stores the chunked tile buffers
       "palette": template.colorPalette // Persist palette and enabled flags
     };
-
-    this.templatesArray = []; // Remove this to enable multiple templates (2/2)
-    this.tileProgress.clear();
-    this.templatesArray.push(template); // Pushes the Template object instance to the Template Array
 
     // ==================== PIXEL COUNT DISPLAY SYSTEM ====================
     // Display pixel count statistics with internationalized number formatting
